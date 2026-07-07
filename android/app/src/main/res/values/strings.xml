@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SwiftPdf</string>
+    <string name="title_activity_main">SwiftPdf</string>
+    <string name="package_name">com.king.swiftpdf</string>
+    <string name="custom_url_scheme">com.king.swiftpdf</string>
+</resources>
