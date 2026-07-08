@@ -21,22 +21,18 @@ jobs:
       - name: Install Project Dependencies
         run: npm install
 
-      # === NEW STEP 1: Build your web application ===
       - name: Build Web Assets
         run: npm run build
 
-      # === NEW STEP 2: Sync assets into the Android folder ===
       - name: Capacitor Sync
         run: npx cap sync android
 
-       Silber Step up Java Runtime (JDK 21)
       - name: Set up Java Runtime (JDK 21)
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21' 
 
-       Silber Grant Gradle Permissions
       - name: Grant Gradle Permissions
         run: chmod +x android/gradlew
 
@@ -45,7 +41,6 @@ jobs:
           cd android
           ./gradlew assembleDebug
 
-       Silber Upload Finished App to GitHub
       - name: Upload Finished App to GitHub
         uses: actions/upload-artifact@v4
         with:
