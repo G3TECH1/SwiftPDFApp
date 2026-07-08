@@ -1,49 +1,60 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>SwiftPDF</title>
-    
-    <link rel="stylesheet" href="./bootstrap.min.css">
-    
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=3.0, user-scalable=yes"
+    />
+    <title>SwiftPDF Viewer</title>
     <style>
-        /* Base Premium Dark Theme Variables */
-        :root {
-            --bg-dark: #121212;
-            --bg-surface: #1e1e1e;
-            --accent-teal: #00f2fe;
-            --text-main: #e0e0e0;
-            --text-muted: #a0a0a0;
-            /* Safe Area Insets for Mobile Notches */
-            --safe-top: env(safe-area-inset-top, 0px);
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
-        }
+      :root {
+        --bg-dark: #121212;
+        --surface-dark: #1e1e1e;
+        --bg-surface: #1e1e1e;
+        --accent-color: #ff4757;
+        --accent-teal: #00f2fe;
+        --text-main: #ffffff;
+        --text-muted: #a0a0a0;
+        --safe-top: env(safe-area-inset-top, 0px);
+        --safe-bottom: env(safe-area-inset-bottom, 0px);
+      }
 
-        /* Prevent system scrolling/pinching on mobile webview */
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-        }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
 
-        /* Full Screen App Layout Wrapper */
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
-        }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background-color: var(--bg-dark);
+        color: var(--text-main);
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+      }
 
-        /* Header - Protected against Notches / Front Cameras */
-        .app-header {
+      /* VIEW 1: FILE PICKER HOME COMPONENT */
+      #main-dashboard {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .welcome-logo {
+        width: 96px;
+        height: 96px;
+        margin-bottom: 20px;
+        filter: drop-shadow(0 4px 10px rgba(255, 71, 87, 0.3));
+      }
+      .app-header {
             background-color: var(--bg-surface);
             padding-top: calc(var(--safe-top) + 12px);
             padding-bottom: 12px;
@@ -52,444 +63,582 @@
             border-bottom: 1px solid #2d2d2d;
             z-index: 10;
         }
+      .upload-card {
+        background-color: var(--surface-dark);
+        padding: 40px 20px;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 350px;
+        border: 2px dashed #333;
+        cursor: pointer;
+        transition: border-color 0.3s;
+      }
 
-        .app-title {
-            font-size: 1.15rem;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            color: #fff;
-        }
-        
-        .accent-text {
-            color: var(--accent-teal);
-        }
+      .upload-card:active {
+        border-color: var(--accent-color);
+      }
 
-        /* Scrollable Content Area for PDF Display */
-        .app-content {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 15px;
-            -webkit-overflow-scrolling: touch; /* Smooth iOS momentum scrolling */
-        }
+      #file-input {
+        display: none;
+      }
 
-        /* Centered Canvas Container */
-        .pdf-viewport {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border-radius: 8px;
-            overflow: hidden;
-            background: #000;
-        }
+      #splash-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: var(--bg-dark);
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: opacity 0.5s ease-out, visibility 0.5s;
+      }
 
-        canvas {
-            max-width: 100%;
-            height: auto !important;
-            display: block;
-        }
+      .spinner-neon {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(0, 242, 254, 0.1);
+        border-radius: 50%;
+        border-top-color: var(--accent-teal);
+        animation: spin 1s ease-in-out infinite;
+      }
 
-        /* Bottom Status/Control Bar */
-        .app-footer {
-            background-color: var(--bg-surface);
-            padding-bottom: calc(var(--safe-bottom) + 12px);
-            padding-top: 12px;
-            padding-left: 16px;
-            padding-right: 16px;
-            border-top: 1px solid #2d2d2d;
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            z-index: 10;
-        }
+      .accent-text {
+        color: var(--accent-teal);
+      }
 
-        /* Premium Buttons */
-        .btn-custom {
-            background-color: #2a2a2a;
-            color: #fff;
-            border: 1px solid #3a3a3a;
-            border-radius: 6px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-        }
-        .btn-custom:active {
-            background-color: var(--accent-teal);
-            color: #121212;
-            border-color: var(--accent-teal);
-        }
+      .mb-3 {
+        margin-bottom: 1rem;
+      }
 
-        /* App Loading/Splash Screen overlay */
-        #splash-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background-color: var(--bg-dark);
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.5s ease-out, visibility 0.5s;
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
         }
+      }
 
-        .spinner-neon {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(0, 242, 254, 0.1);
-            border-radius: 50%;
-            border-top-color: var(--accent-teal);
-            animation: spin 1s ease-in-out infinite;
-        }
+      /* In-App Mobile Toast Notifications */
+      .mobile-toast {
+        position: fixed;
+        bottom: calc(var(--safe-bottom) + 70px);
+        left: 50%;
+        transform: translateX(-50%) translateY(100px);
+        background-color: #252525;
+        color: #fff;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-size: 0.9rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        z-index: 2000;
+        opacity: 0;
+        transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+          opacity 0.3s ease;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      .mobile-toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+      }
+      .mobile-toast.success {
+        border-left: 4px solid var(--accent-teal);
+      }
+      .mobile-toast.error {
+        border-left: 4px solid #ff4a4a;
+      }
+      /* VIEW 2: PREMIUM MOBILE READER VIEWPORT */
+      #reader-viewport {
+        display: none; /* Hidden by default until file is selected */
+        flex-direction: column;
+        height: 100vh;
+        width: 100vw;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 100;
+        background-color: #0b0b0b;
+      }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+      /* PREMIUM STATUS CONTROL HEADER BAR */
+      .reader-header {
+        background-color: var(--bg-surface);
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: calc(var(--safe-top) + 8px) 16px 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        border-bottom: 1px solid #2d2d2d;
+        z-index: 10;
+      }
 
-        /* In-App Mobile Toast Notifications */
-        .mobile-toast {
-            position: fixed;
-            bottom: calc(var(--safe-bottom) + 70px);
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background-color: #252525;
-            color: #fff;
-            padding: 12px 24px;
-            border-radius: 30px;
-            font-size: 0.9rem;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.05);
-            z-index: 2000;
-            opacity: 0;
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
-            pointer-events: none;
-            white-space: nowrap;
-        }
-        .mobile-toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-        .mobile-toast.success { border-left: 4px solid var(--accent-teal); }
-        .mobile-toast.error { border-left: 4px solid #ff4a4a; }
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
 
-        /* Welcome Empty State Context */
-        .empty-state {
-            text-align: center;
-            margin-top: auto;
-            margin-bottom: auto;
-            color: var(--text-muted);
-        }
+      .back-arrow {
+        background: none;
+        border: none;
+        color: var(--text-main);
+        font-size: 28px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px;
+      }
+
+      .brand-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .mini-logo {
+        width: 28px;
+        height: 28px;
+      }
+
+      .app-title {
+        font-weight: 700;
+        font-size: 18px;
+        letter-spacing: 0.5px;
+      }
+
+      /* PAGE TRACKER AND ZOOM CONTROLLER OVERLAYS */
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .page-indicator {
+        font-size: 14px;
+        color: var(--text-muted);
+        background: rgba(255, 255, 255, 0.05);
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+
+      .zoom-controls {
+        display: flex;
+        gap: 4px;
+      }
+
+      .zoom-btn {
+        background: #2a2a2a;
+        border: none;
+        color: white;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        font-size: 18px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .zoom-btn:active {
+        background: var(--accent-color);
+      }
+
+      /* SCROLLABLE INTERACTIVE RENDERING CANVAS */
+      .canvas-container {
+        flex: 1;
+        overflow: auto;
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 16px;
+        background-color: #0b0b0b;
+      }
+
+      #pdf-canvas {
+        display: block;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+        border-radius: 4px;
+        transform-origin: top center;
+      }
+
+      /* DYNAMIC SWIPE NAVIGATOR BAR */
+      .bottom-nav {
+        height: 54px;
+        background-color: var(--surface-dark);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        border-top: 1px solid #2d2d2d;
+      }
+
+      .nav-action-btn {
+        background: none;
+        border: none;
+        color: var(--text-main);
+        padding: 10px 24px;
+        font-size: 14px;
+        font-weight: 600;
+        border-radius: 8px;
+      }
+
+      .nav-action-btn:active {
+        background-color: rgba(255, 71, 87, 0.15);
+        color: var(--accent-color);
+      }
     </style>
-</head>
-<body>
-
+  </head>
+  <body>
     <div id="splash-screen">
-        <div class="spinner-neon mb-3"></div>
-        <h1 class="h5 fw-bold tracking-wide text-white">Swift<span class="accent-text">PDF</span></h1>
+      <div class="spinner-neon mb-3"></div>
+      <h1 class="h5 fw-bold tracking-wide text-white">
+        Swift<span class="accent-text">PDF</span>
+      </h1>
     </div>
 
-    <div class="app-container">
-        
-        <header class="app-header d-flex justify-content-between align-items-center">
+    <header
+      class="app-header d-flex justify-content-between align-items-center"
+    >
+      <div class="app-title">Swift<span class="accent-text">PDF</span></div>
+    </header>
+    <main id="main-dashboard">
+      <p style="color: var(--text-muted); margin-bottom: 30px">
+        Premium Offline PDF Engine
+      </p>
+
+      <div
+        class="upload-card"
+        onclick="document.getElementById('file-input').click()"
+      >
+        <svg
+          width="48"
+          height="48"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="#ff4757"
+          stroke-width="2"
+          style="margin-bottom: 12px"
+        >
+          <path
+            d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+          ></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="12" y1="18" x2="12" y2="12"></line>
+          <polyline points="9 15 12 12 15 15"></polyline>
+        </svg>
+        <p style="font-weight: 500">Select PDF Document</p>
+      </div>
+      <div
+        id="recent-files-container"
+        style="
+          display: none;
+          width: 100%;
+          max-width: 400px;
+          margin-top: 24px;
+          text-align: left;
+        "
+      >
+        <h6
+          style="
+            font-size: 0.9rem;
+            opacity: 0.8;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+          "
+        >
+          Recent Documents
+        </h6>
+        <div
+          id="recent-files-list"
+          style="display: flex; flex-direction: column; gap: 10px"
+        ></div>
+      </div>
+      <input type="file" id="file-input" accept="application/pdf" />
+    </main>
+
+    <section id="reader-viewport">
+      <header class="reader-header">
+        <div class="header-left">
+          <button class="back-arrow" id="close-reader-btn" aria-label="Go Back">
+            🡠
+          </button>
+          <div class="brand-container">
+            <!-- <img src="resources/icon.png" alt="" class="mini-logo" /> -->
             <div class="app-title">Swift<span class="accent-text">PDF</span></div>
-            <div>
-                <input type="file" id="file-input" accept=".pdf" style="display: none;">
-                <button class="btn btn-sm btn-custom px-3" onclick="document.getElementById('file-input').click()">
-                    Open File
-                </button>
-            </div>
-        </header>
+          </div>
+        </div>
 
-        <main class="app-content" id="gesture-zone">
-            <div id="empty-view" class="empty-state w-100">
-                <p class="mb-1 fw-semibold text-white">No Document Active</p>
-                <small>Tap "Open File" to browse your device storage.</small>
-                
-                <div id="recent-files-container" class="mt-4 px-3" style="display: none; max-width: 400px; margin: 0 auto;">
-                    <h6 class="text-white mb-2 border-bottom border-secondary pb-1 text-start" style="font-size: 0.9rem; opacity: 0.8;">Recent Documents</h6>
-                    <div id="recent-files-list" class="d-flex flex-column gap-2"></div>
-                </div>
-            </div>
-            <div class="pdf-viewport d-none" id="pdf-wrapper">
-                <canvas id="pdf-canvas"></canvas>
-            </div>
-        </main>
+        <div class="header-right">
+          <span class="page-indicator" id="page-counter">0 / 0</span>
+          <div class="zoom-controls">
+            <button class="zoom-btn" id="zoom-out-btn">−</button>
+            <button class="zoom-btn" id="zoom-in-btn">+</button>
+          </div>
+        </div>
+      </header>
 
-        <footer class="app-footer d-flex justify-content-between align-items-center">
-            <div id="file-name-display" class="text-truncate" style="max-width: 60%;">No file active</div>
-            <div id="page-counter-display">Page: -- / --</div>
-        </footer>
+      <div class="canvas-container">
+        <canvas id="pdf-canvas"></canvas>
+      </div>
 
+      <footer class="bottom-nav">
+        <button class="nav-action-btn" id="prev-page-btn">Previous</button>
+        <button class="nav-action-btn" id="next-page-btn">Next</button>
+      </footer>
+    </section>
+
+    <div id="toast-notification" class="mobile-toast">
+      Document Loaded Successfully!
     </div>
-
-    <div id="toast-notification" class="mobile-toast">Document Loaded Successfully!</div>
-
-    <script src="capacitor.js"></script>
 
     <script type="module">
-        // Import local modern dependencies
-        import * as pdfjsLib from './pdf.mjs';
-        pdfjsLib.GlobalWorkerOptions.workerSrc = './pdf.worker.mjs';
+      import * as pdfjsLib from "./pdf.mjs";
+      pdfjsLib.GlobalWorkerOptions.workerSrc = "./pdf.worker.mjs";
 
-        // Application State Management
-        let pdfDoc = null;
-        let pageNum = 1;
-        let pageIsRendering = false;
-        let pageNumPending = null;
+      let currentPdf = null;
+      let currentPageNum = 1;
+      let currentScale = 1.0; // Scalable base setting tracker
+      let isRendering = false;
 
-        const canvas = document.getElementById('pdf-canvas');
-        const ctx = canvas.getContext('2d');
+      const mainDashboard = document.getElementById("main-dashboard");
+      const readerViewport = document.getElementById("reader-viewport");
+      const fileInput = document.getElementById("file-input");
+      const recentFilesContainer = document.getElementById(
+        "recent-files-container",
+      );
+      const recentFilesList = document.getElementById("recent-files-list");
+      const canvas = document.getElementById("pdf-canvas");
+      const ctx = canvas.getContext("2d");
+      const Filesystem = window.Capacitor?.Plugins?.Filesystem;
+      const Preferences = window.Capacitor?.Plugins?.Preferences;
+      let currentFileName = "";
 
-        // Elements
-        const fileInput = document.getElementById('file-input');
-        const emptyView = document.getElementById('empty-view');
-        const pdfWrapper = document.getElementById('pdf-wrapper');
-        const fileNameDisplay = document.getElementById('file-name-display');
-        const pageCounterDisplay = document.getElementById('page-counter-display');
-        const splashScreen = document.getElementById('splash-screen');
-
-        // Capacitor Native Plugin Integrations
-        const Filesystem = window.Capacitor?.Plugins?.Filesystem;
-        const Preferences = window.Capacitor?.Plugins?.Preferences;
-
-        // Base64 helper for native binary handling over the Capacitor bridge
-        function arrayBufferToBase64(buffer) {
-            let binary = '';
-            const bytes = new Uint8Array(buffer);
-            const len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-                binary += String.fromCharCode(bytes[i]);
-            }
-            return window.btoa(binary);
+      function arrayBufferToBase64(buffer) {
+        let binary = "";
+        const bytes = new Uint8Array(buffer);
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+          binary += String.fromCharCode(bytes[i]);
         }
+        return window.btoa(binary);
+      }
 
-        function base64ToUint8Array(base64) {
-            const binaryString = window.atob(base64);
-            const len = binaryString.length;
-            const bytes = new Uint8Array(len);
-            for (let i = 0; i < len; i++) {
-                bytes[i] = binaryString.charCodeAt(i);
-            }
-            return bytes;
+      function base64ToUint8Array(base64) {
+        const binaryString = window.atob(base64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
         }
+        return bytes;
+      }
 
-        async function savePDFToStorage(fileName, arrayBuffer) {
-            if (!Filesystem || !Preferences) return;
-            try {
-                const base64Data = arrayBufferToBase64(arrayBuffer);
-                
-                await Filesystem.writeFile({
-                    path: `cached_${fileName}`,
-                    data: base64Data,
-                    directory: 'DATA'
-                });
+      async function savePDFToStorage(fileName, arrayBuffer) {
+        if (!Filesystem || !Preferences) return;
+        try {
+          const base64Data = arrayBufferToBase64(arrayBuffer);
+          await Filesystem.writeFile({
+            path: `cached_${fileName}`,
+            data: base64Data,
+            directory: "DATA",
+          });
 
-                const { value } = await Preferences.get({ key: 'recent_pdf_list' });
-                let files = value ? JSON.parse(value) : [];
+          const { value } = await Preferences.get({ key: "recent_pdf_list" });
+          let files = value ? JSON.parse(value) : [];
 
-                files = files.filter(f => f.name !== fileName);
-                files.unshift({ name: fileName, timestamp: Date.now() });
+          files = files.filter((f) => f.name !== fileName);
+          files.unshift({ name: fileName, timestamp: Date.now() });
 
-                if (files.length > 5) {
-                    const discarded = files.pop();
-                    await Filesystem.deleteFile({
-                        path: `cached_${discarded.name}`,
-                        directory: 'DATA'
-                    }).catch(() => {});
-                }
+          if (files.length > 5) {
+            const discarded = files.pop();
+            await Filesystem.deleteFile({
+              path: `cached_${discarded.name}`,
+              directory: "DATA",
+            }).catch(() => {});
+          }
 
-                await Preferences.set({
-                    key: 'recent_pdf_list',
-                    value: JSON.stringify(files)
-                });
+          await Preferences.set({
+            key: "recent_pdf_list",
+            value: JSON.stringify(files),
+          });
 
-                loadRecentFilesUI();
-            } catch (err) {
-                console.error("Native storage writing error:", err);
-            }
+          loadRecentFilesUI();
+        } catch (err) {
+          console.error("Native storage writing error:", err);
         }
+      }
 
-        async function loadRecentFilesUI() {
-            if (!Preferences) return;
-            try {
-                const { value } = await Preferences.get({ key: 'recent_pdf_list' });
-                const files = value ? JSON.parse(value) : [];
-                const container = document.getElementById('recent-files-container');
-                const list = document.getElementById('recent-files-list');
+      async function loadRecentFilesUI() {
+        if (!Preferences) return;
+        try {
+          const { value } = await Preferences.get({ key: "recent_pdf_list" });
+          const files = value ? JSON.parse(value) : [];
 
-                if (files && files.length > 0) {
-                    container.style.display = 'block';
-                    list.innerHTML = '';
-
-                    files.forEach(fileRec => {
-                        const btn = document.createElement('button');
-                        btn.className = 'btn btn-sm btn-custom text-start text-truncate w-100 py-2 px-3';
-                        btn.innerHTML = `📄 ${fileRec.name}`;
-                        btn.onclick = () => loadPDFFromStorage(fileRec.name);
-                        list.appendChild(btn);
-                    });
-                } else {
-                    container.style.display = 'none';
-                }
-            } catch (err) {
-                console.error("Native history presentation error:", err);
-            }
-        }
-
-        async function loadPDFFromStorage(fileName) {
-            if (!Filesystem) return;
-            try {
-                fileNameDisplay.innerText = fileName;
-                
-                const fileResult = await Filesystem.readFile({
-                    path: `cached_${fileName}`,
-                    directory: 'DATA'
-                });
-
-                const typedarray = base64ToUint8Array(fileResult.data);
-                processPDFArrayBuffer(typedarray);
-            } catch (err) {
-                console.error("Native storage retrieval error:", err);
-                showToast("Failed to load document from history.", "error");
-            }
-        }
-
-        function processPDFArrayBuffer(typedarray) {
-            pdfjsLib.getDocument({data: typedarray}).promise.then(pdf => {
-                pdfDoc = pdf;
-                pageNum = 1;
-                
-                emptyView.classList.add('d-none');
-                pdfWrapper.classList.remove('d-none');
-                
-                renderPage(pageNum);
-                showToast("Document Loaded Successfully!", "success");
-            }).catch(err => {
-                console.error(err);
-                showToast("Error processing PDF document.", "error");
+          if (files && files.length > 0) {
+            recentFilesContainer.style.display = "block";
+            recentFilesList.innerHTML = "";
+            files.forEach((fileRec) => {
+              const btn = document.createElement("button");
+              btn.textContent = `📄 ${fileRec.name}`;
+              btn.style.background = "#2a2a2a";
+              btn.style.border = "1px solid #3a3a3a";
+              btn.style.color = "#fff";
+              btn.style.borderRadius = "10px";
+              btn.style.padding = "12px 14px";
+              btn.style.textAlign = "left";
+              btn.style.cursor = "pointer";
+              btn.onclick = () => loadPDFFromStorage(fileRec.name);
+              recentFilesList.appendChild(btn);
             });
+          } else {
+            recentFilesContainer.style.display = "none";
+          }
+        } catch (err) {
+          console.error("Native history presentation error:", err);
         }
+      }
 
-        /* Splash Screen Exiting Loop */
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
-                loadRecentFilesUI();
-                splashScreen.style.opacity = '0';
-                splashScreen.style.visibility = 'hidden';
-            }, 2500);
+      async function loadPDFFromStorage(fileName) {
+        if (!Filesystem) return;
+        try {
+          const fileResult = await Filesystem.readFile({
+            path: `cached_${fileName}`,
+            directory: "DATA",
+          });
+          const typedarray = base64ToUint8Array(fileResult.data);
+          currentFileName = fileName;
+          await openDocumentFromArrayBuffer(typedarray);
+        } catch (err) {
+          console.error("Native storage retrieval error:", err);
+          showToast("Failed to load document from history.", "error");
+        }
+      }
+
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast-notification");
+        toast.innerText = message;
+        toast.className = `mobile-toast show ${type}`;
+        setTimeout(() => {
+          toast.classList.remove("show");
+        }, 3000);
+      }
+
+      async function openDocumentFromArrayBuffer(typedArray) {
+        try {
+          currentPdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+          currentPageNum = 1;
+          mainDashboard.style.display = "none";
+          readerViewport.style.display = "flex";
+          renderPdfPage(currentPageNum);
+          showToast("Document Loaded Successfully!", "success");
+        } catch (error) {
+          console.error(error);
+          showToast("Error processing PDF document.", "error");
+        }
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        setTimeout(() => {
+          loadRecentFilesUI();
+          const splash = document.getElementById("splash-screen");
+          if (splash) {
+            splash.style.opacity = "0";
+            splash.style.visibility = "hidden";
+          }
+        }, 2500);
+      });
+
+      // Toggle Screen Switch Actions
+      fileInput.addEventListener("change", async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const fileReader = new FileReader();
+        fileReader.onload = async function () {
+          const typedArray = new Uint8Array(this.result);
+          try {
+            currentFileName = file.name;
+            savePDFToStorage(file.name, this.result);
+            await openDocumentFromArrayBuffer(typedArray);
+          } catch (error) {
+            alert("Error parsing document assets: " + error.message);
+          }
+        };
+        fileReader.readAsArrayBuffer(file);
+      });
+
+      // Back Arrow Navigation Click Listener
+      document
+        .getElementById("close-reader-btn")
+        .addEventListener("click", () => {
+          readerViewport.style.display = "none";
+          mainDashboard.style.display = "flex";
+          fileInput.value = ""; // Reset chosen asset string data
         });
 
-        /* Custom Native Toast Alert Engine */
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast-notification');
-            toast.innerText = message;
-            toast.className = `mobile-toast show ${type}`;
-            
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
+      // Core Scale Engine Function Rendering Canvas Viewport
+      async function renderPdfPage(pageNum) {
+        if (!currentPdf || isRendering) return;
+        isRendering = true;
 
-        /* Render Logic Engine for Canvas processing */
-        function renderPage(num) {
-            pageIsRendering = true;
-            
-            pdfDoc.getPage(num).then(page => {
-                const viewport = page.getViewport({ scale: 1.5 });
-                const outputScale = window.devicePixelRatio || 1;
-                
-                canvas.width = Math.floor(viewport.width * outputScale);
-                canvas.height = Math.floor(viewport.height * outputScale);
-                canvas.style.width = Math.floor(viewport.width) + "px";
-                canvas.style.height = Math.floor(viewport.height) + "px";
+        const page = await currentPdf.getPage(pageNum);
 
-                const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+        // Calculate responsive mobile baseline scale viewport sizing dynamically
+        const initialViewport = page.getViewport({ scale: 1.0 });
+        const containerWidth =
+          document.querySelector(".canvas-container").clientWidth - 32;
+        const baseScale = containerWidth / initialViewport.width;
 
-                const renderContext = {
-                    canvasContext: ctx,
-                    viewport: viewport,
-                    transform: transform
-                };
+        // Merge initial responsive size calculation with user zoom adjustments multipliers
+        const viewport = page.getViewport({ scale: baseScale * currentScale });
 
-                page.render(renderContext).promise.then(() => {
-                    pageIsRendering = false;
-                    if (pageNumPending !== null) {
-                        renderPage(pageNumPending);
-                        pageNumPending = null;
-                    }
-                });
+        canvas.width = viewport.width;
+        canvas.height = viewport.height;
 
-                pageCounterDisplay.innerText = `Page: ${num} / ${pdfDoc.numPages}`;
-            });
-        }
+        const renderContext = {
+          canvasContext: ctx,
+          viewport: viewport,
+        };
 
-        function queueRenderPage(num) {
-            if (pageIsRendering) {
-                pageNumPending = num;
-            } else {
-                renderPage(num);
-            }
-        }
+        await page.render(renderContext).promise;
+        isRendering = false;
 
-        function prevPage() {
-            if (pageNum <= 1) return;
-            pageNum--;
-            queueRenderPage(pageNum);
-        }
+        // Update counters
+        document.getElementById(
+          "page-counter",
+        ).textContent = `${pageNum} / ${currentPdf.numPages}`;
+      }
 
-        function nextPage() {
-            if (pageNum >= pdfDoc.numPages) return;
-            pageNum++;
-            queueRenderPage(pageNum);
-        }
+      // Pagination Events
+      document.getElementById("prev-page-btn").addEventListener("click", () => {
+        if (currentPageNum <= 1) return;
+        currentPageNum--;
+        renderPdfPage(currentPageNum);
+      });
 
-        /* Native Storage Access Processing */
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+      document.getElementById("next-page-btn").addEventListener("click", () => {
+        if (!currentPdf || currentPageNum >= currentPdf.numPages) return;
+        currentPageNum++;
+        renderPdfPage(currentPageNum);
+      });
 
-            fileNameDisplay.innerText = file.name;
+      // Smooth Core Zoom Control Engine Handlers
+      document.getElementById("zoom-in-btn").addEventListener("click", () => {
+        if (currentScale >= 3.0) return; // Prevent over-zooming crash limits
+        currentScale += 0.25;
+        renderPdfPage(currentPageNum);
+      });
 
-            const fileReader = new FileReader();
-            fileReader.onload = function() {
-                const typedarray = new Uint8Array(this.result);
-                
-                savePDFToStorage(file.name, this.result);
-                processPDFArrayBuffer(typedarray);
-            };
-            fileReader.readAsArrayBuffer(file);
-        });
-
-        /* Native Touch Swipe Detection Module */
-        let touchStartX = 0;
-        let touchEndX = 0;
-        const gestureZone = document.getElementById('gesture-zone');
-
-        gestureZone.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-        }, { passive: true });
-
-        gestureZone.addEventListener('touchend', e => {
-            touchEndX = e.changedTouches[0].screenX;
-            handleSwipeGesture();
-        }, { passive: true });
-
-        function handleSwipeGesture() {
-            const swipeThreshold = 60;
-            if (!pdfDoc) return;
-
-            if (touchStartX - touchEndX > swipeThreshold) {
-                nextPage();
-            } else if (touchEndX - touchStartX > swipeThreshold) {
-                prevPage();
-            }
-        }
+      document.getElementById("zoom-out-btn").addEventListener("click", () => {
+        if (currentScale <= 0.75) return; // Cap lowest zoom readability size
+        currentScale -= 0.25;
+        renderPdfPage(currentPageNum);
+      });
     </script>
-</body>
+  </body>
 </html>
